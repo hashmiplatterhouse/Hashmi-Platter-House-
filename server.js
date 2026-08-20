@@ -169,7 +169,7 @@ app.get("/api/reports/summary",auth,(req,res)=>{
 });
 
 /* Website */
-app.use(express.static("./public"));
+app.use(express.static("./Public"));
 app.get("*",(req,res)=>{
   if(req.path.startsWith("/api/")) return res.status(404).json({error:"API route not found"});
   res.sendFile(process.cwd()+"/public/index.html");
