@@ -1,4 +1,4 @@
-import express from "express";
+2import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
@@ -72,8 +72,26 @@ CREATE TABLE IF NOT EXISTS payment_proofs(
  created_at TEXT NOT NULL
 );
 `);
-
 const now=()=>new Date().toISOString();
+
+// Create the single owner admin...
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+if (ADMIN_EMAIL && ADMIN_PASSWORD) {
+  const existingAdmin = db
+    .prepare("SELECT id FROM admins WHERE email=?")
+    .get(ADMIN_EMAIL);
+
+  if (!existingAdmin) {
+    const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 12);
+
+    db.prepare(`
+      INSERT INTO admins (email, password_hash, role, created_at)
+      VALUES (?, ?, 'owner', ?)
+    `).run(ADMIN_EMAIL, passwordHash, now());
+  }
+}
 
 function auth(req,res,next){
   try{
